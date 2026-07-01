@@ -1,0 +1,29 @@
+name: QRB5 Multimedia SDK CI
+
+on:
+  push:
+    branches: [main, 'rb5-bsp-*']
+  pull_request:
+    branches: [main, 'rb5-bsp-*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: qualcomm/qrb5-build:2.4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: meson setup build/ --prefix=/usr
+      - name: Build
+        run: ninja -C build/
+      - name: Test
+        run: ninja -C build/ test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting
+        run: |
+          find src/ -name '*.c' -o -name '*.h' | xargs clang-format --dry-run --Werror
